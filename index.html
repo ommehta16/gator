@@ -4,11 +4,12 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-    <title>Circuit</title>
+    <title>ALLIGATER</title>
     <!-- <link rel="icon" href="static/icon.png">
     <link rel="icon" href="static/icon.svg"> -->
     <link rel="stylesheet" href="styles.css">
     <script src="index.js" defer></script>
+    <script src="https://kit.fontawesome.com/73bd27aadc.js" crossorigin="anonymous"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
@@ -23,10 +24,31 @@
 
     </div>
     <div id="edit-actions">
-        <button id="add-and">AND</button>
-        <button id="add-or">OR</button>
-        <button id="add-not">NOT</button>
+        <div class="flex row">
+            <button id="add-and">AND</button>
+            <button id="add-or">OR</button>
+            <button id="add-not">NOT</button>
+        </div>
+        <div class="flex row">
+            <button class="fa-solid fa-pencil"></button>
+            <button class="fa-solid fa-eraser"></button>
+        </div>
     </div>
+    <dialog id="dia">
+        <div>
+            <div class="flex row">
+                <h2>Alligater</h2>
+                <button class="fa-solid" onclick="dia.close()">X</button>
+            </div>
+            <p>Make your own gates!</p>
+        </div>
+        <footer>
+            <div>(c) Om Mehta 2025</div>
+            <div>Made by <a href="https://ommehta16.github.io"><b>Om</b></a></div>
+        </footer>
+    </dialog>
+    <button id="info" onclick="dia.showModal()"><i class="fa-solid fa-info"></i></button>
+    <!-- get icon!! (fontawesome?) -->
 </body>
 
 </html>

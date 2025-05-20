@@ -83,6 +83,7 @@ class Line extends Drawable {
     pt2;
     // ^ Point
     color;
+    thickness = 1;
 
     /**
      * @param {Point} pt1 
@@ -97,6 +98,8 @@ class Line extends Drawable {
     }
 
     render() {
+        const oldThickness = ctx.lineWidth;
+        ctx.lineWidth = this.thickness;
         this.pt1.render();
         this.pt2.render();
 
@@ -107,6 +110,7 @@ class Line extends Drawable {
 
         ctx.strokeStyle = this.color;
         ctx.stroke();
+        ctx.lineWidth = oldThickness;
     }
 
     copy() {
@@ -130,7 +134,7 @@ function resizeCanvas() {
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
-let start = new Point(100, 100, 10);
+let start = new Point(100, 100, 3);
 let end = start;
 
 const curr = new Line(start, end, "red");
@@ -172,7 +176,7 @@ const getSnap = (e) => {
 canvas.addEventListener("click", e => {
     let snapPoint = getSnap(e);
 
-    if (snapPoint == null) return;  //snapPoint = new Point(e.clientX * ratio, e.clientY * ratio, 10);
+    if (snapPoint == null) return; //snapPoint = new Point(e.clientX * ratio, e.clientY * ratio, 10);
 
     if (curr.pt1 == curr.pt2) {
         curr.pt1 = snapPoint;
@@ -184,29 +188,31 @@ canvas.addEventListener("click", e => {
     }
 
     // we have to close out the line and finalize it
-
     let finalized = curr.copy();
     finalized.pt1 = curr.pt1;
     finalized.pt2 = snapPoint;
 
-    curr.pt2 = curr.pt1 = snapPoint.copy();
+    curr.pt1 = curr.pt2;
+
+    curr.pt2.x = snapPoint.x;
+    curr.pt2.y = snapPoint.y;
 
     if (inpFree.has(snapPoint)) {
         inpFree.delete(snapPoint);
         inpConnected.add(snapPoint);
     }
     else {
-        console.log("should delete the other line");
         renderer.remove(snapPoint.lineTo);
     }
 
     finalized.pt1.lineTo = finalized;
     finalized.pt2.lineTo = finalized;
     finalized.color = "#fff";
+    finalized.thickness = 3;
     renderer.draw(finalized);
 });
 
-canvas.addEventListener("mousemove", e => {
+window.addEventListener("mousemove", e => {
     let snapPoint = getSnap(e);
     if (snapPoint == null) snapPoint = new Point(e.clientX * ratio, e.clientY * ratio, 10);
 
@@ -260,21 +266,18 @@ class LogicNode extends Drawable {
     }
 
     updatePoints() {
-        let elLeft = this.element.getBoundingClientRect().left;
-        let elRight = this.element.getBoundingClientRect().right;
-        let elTop = this.element.getBoundingClientRect().top;
-        let elBottom = this.element.getBoundingClientRect().bottom;
+        const rect = this.element.getBoundingClientRect();
 
-        let lIncr = (elBottom - elTop) / (this.inputs.length + 1);
+        let lIncr = rect.height / (this.inputs.length + 1);
         this.inputs.forEach((point, i) => {
-            point.x = (elLeft - 8) * ratio;
-            point.y = (elTop + (i + 1) * lIncr) * ratio;
+            point.x = (rect.left - 8) * ratio;
+            point.y = (rect.top + (i + 1) * lIncr) * ratio;
         });
 
-        let rIncr = (elBottom - elTop) / (this.outputs.length + 1);
+        let rIncr = rect.height / (this.outputs.length + 1);
         this.outputs.forEach((point, i) => {
-            point.x = (elRight + 8) * ratio;
-            point.y = (elTop + (i + 1) * rIncr) * ratio;
+            point.x = (rect.right + 8) * ratio;
+            point.y = (rect.top + (i + 1) * rIncr) * ratio;
         });
     }
 
