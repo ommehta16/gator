@@ -1,11 +1,11 @@
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
+document.querySelector("#canvas-container").appendChild(canvas);
 
 const snapDist = 40;
 let clicked = false;
 
-let mouseX = 0;
-let mouseY = 0;
+let mouseX = 0, mouseY = 0;
 document.addEventListener("mousemove", e => {
     mouseX = e.clientX;
     mouseY = e.clientY;
@@ -14,13 +14,13 @@ document.addEventListener("mousemove", e => {
 document.addEventListener("mousedown", () => { clicked = true; })
 document.addEventListener("mouseup", () => { clicked = false; })
 
-document.querySelector("#canvas-container").appendChild(canvas);
+let ratio = window.devicePixelRatio;
 
-class Drawable {
-    render() { }
-}
+class Drawable { render() { } }
 
 class Renderer {
+
+    /** @type {Drawable[]} */
     #toDraw = [];
 
     constructor() {
@@ -49,20 +49,22 @@ const renderer = new Renderer();
 class Point extends Drawable {
     x = 0;
     y = 0;
-    radius = 0;
-    color = "#fff";
+    radius;
+    color;
+    node = null;
 
     /**
      * @param {number} x 
      * @param {number} y 
      * @param {number} radius 
      */
-    constructor(x, y, radius = 0, color = "fff") {
+    constructor(x, y, radius = 0, color = "#fff") {
         super();
 
         this.x = x;
         this.y = y;
         this.radius = radius;
+        this.color = color;
     }
 
     render() {
@@ -122,110 +124,13 @@ class Line extends Drawable {
     }
 }
 
-let ratio = window.devicePixelRatio;
-
-function resizeCanvas() {
-    ratio = window.devicePixelRatio;
-    canvas.width = window.innerWidth * ratio;
-    canvas.height = window.innerHeight * ratio;
-    renderer.render();
-}
-
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas();
-
-let start = new Point(100, 100, 3);
-let end = start;
-
-const curr = new Line(start, end, "red");
-renderer.draw(curr);
-
-let inpConnected = new Set();
-let outConnected = new Set();
-
-let inpFree = new Set();
-let outFree = new Set();
-
-
-const distance = (x1, y1, x2, y2) => Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
-
-const getSnap = (e) => {
-    let lowest = snapDist;
-    let closePt = null;
-    /** @param {Point} point */
-    const checkNearest = point => {
-        const dist = distance(point.x, point.y, e.clientX * ratio, e.clientY * ratio);
-        if (dist >= lowest) return;
-        lowest = dist;
-        closePt = point;
-    }
-
-
-    if (curr.pt1 == curr.pt2) { // we still need to place first node
-        outFree.forEach(checkNearest);
-        outConnected.forEach(checkNearest);
-        return closePt;
-    }
-    inpFree.forEach(checkNearest);
-    freeClose = closePt;
-    inpConnected.forEach(checkNearest);
-
-    return closePt;
-}
-
-canvas.addEventListener("click", e => {
-    let snapPoint = getSnap(e);
-
-    if (snapPoint == null) return; //snapPoint = new Point(e.clientX * ratio, e.clientY * ratio, 10);
-
-    if (curr.pt1 == curr.pt2) {
-        curr.pt1 = snapPoint;
-        if (outFree.has(snapPoint)) {
-            outFree.delete(snapPoint);
-            outConnected.add(snapPoint);
-        }
-        return;
-    }
-
-    // we have to close out the line and finalize it
-    let finalized = curr.copy();
-    finalized.pt1 = curr.pt1;
-    finalized.pt2 = snapPoint;
-
-    curr.pt1 = curr.pt2;
-
-    curr.pt2.x = snapPoint.x;
-    curr.pt2.y = snapPoint.y;
-
-    if (inpFree.has(snapPoint)) {
-        inpFree.delete(snapPoint);
-        inpConnected.add(snapPoint);
-    }
-    else {
-        renderer.remove(snapPoint.lineTo);
-    }
-
-    finalized.pt1.lineTo = finalized;
-    finalized.pt2.lineTo = finalized;
-    finalized.color = "#fff";
-    finalized.thickness = 3;
-    renderer.draw(finalized);
-});
-
-window.addEventListener("mousemove", e => {
-    let snapPoint = getSnap(e);
-    if (snapPoint == null) snapPoint = new Point(e.clientX * ratio, e.clientY * ratio, 10);
-
-    curr.pt2.x = snapPoint.x;
-    curr.pt2.y = snapPoint.y;
-
-    renderer.render();
-})
-
+/** @param {number} a, @param {number} lo, @param {number} hi */
 const clamp = (a, lo, hi) => Math.max(Math.min(a, hi), lo);
 
 class LogicNode extends Drawable {
+    /** @type {Point[]} */
     inputs = [];
+    /** @type {Point[]} */
     outputs = [];
     #func;
     element;
@@ -233,6 +138,7 @@ class LogicNode extends Drawable {
     /**
      * @param {number} inputs 
      * @param {number} outputs 
+     * @param {string} name 
      * @param {Function} func 
      */
     constructor(inputs, outputs, name, func) {
@@ -240,8 +146,14 @@ class LogicNode extends Drawable {
 
         for (let i = 0; i < inputs; i++) this.inputs.push(new Point(0, 0, 10));
         for (let i = 0; i < outputs; i++) this.outputs.push(new Point(0, 0, 10));
-        this.inputs.forEach(pt => inpFree.add(pt));
-        this.outputs.forEach(pt => outFree.add(pt));
+        this.inputs.forEach(pt => {
+            inpFree.add(pt);
+            pt.node = this;
+        });
+        this.outputs.forEach(pt => {
+            outFree.add(pt);
+            pt.node = this;
+        });
         this.#func = func;
         this.name = name;
 
@@ -287,6 +199,115 @@ class LogicNode extends Drawable {
         this.outputs.forEach(itm => itm.render());
     }
 }
+
+function resizeCanvas() {
+    ratio = window.devicePixelRatio;
+    canvas.width = window.innerWidth * ratio;
+    canvas.height = window.innerHeight * ratio;
+    renderer.render();
+}
+
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
+
+let start = new Point(100, 100, 3);
+let end = start;
+
+const curr = new Line(start, end, "red");
+renderer.draw(curr);
+
+/** @type {Set<Point>} */
+let inpConnected = new Set();
+/** @type {Set<Point>} */
+let outConnected = new Set();
+
+/** @type {Set<Point>} */
+let inpFree = new Set();
+/** @type {Set<Point>} */
+let outFree = new Set();
+
+
+/**
+ * @param {number} x1, @param {number} y1, @param {number} x2, @param {number} y2 
+ * @returns {number}
+ */
+const distance = (x1, y1, x2, y2) => Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+
+/**
+ * @param {MouseEvent} e 
+ * @returns {Point}
+ */
+const getSnap = (e) => {
+    let lowest = snapDist;
+    let closePt = null;
+
+    /** @param {Point} point */
+    const checkNearest = point => {
+        const dist = distance(point.x, point.y, e.clientX * ratio, e.clientY * ratio);
+        if (dist >= lowest) return;
+        if (point.node == curr.pt1.node) return;
+        lowest = dist;
+        closePt = point;
+    }
+
+    if (curr.pt1 == curr.pt2) { // we still need to place first node
+        outFree.forEach(checkNearest);
+        outConnected.forEach(checkNearest);
+    } else {
+        inpFree.forEach(checkNearest);
+        inpConnected.forEach(checkNearest);
+    }
+
+    return closePt;
+}
+
+canvas.addEventListener("click", e => {
+    let snapPoint = getSnap(e);
+
+    if (snapPoint == null) return; //snapPoint = new Point(e.clientX * ratio, e.clientY * ratio, 10);
+
+    if (curr.pt1 == curr.pt2) {
+        curr.pt1 = snapPoint;
+        if (!outFree.has(snapPoint)) return;
+        outFree.delete(snapPoint);
+        outConnected.add(snapPoint);
+        return;
+    }
+
+    // we have to close out the line and finalize it
+    let finalized = curr.copy();
+    finalized.pt1 = curr.pt1;
+    finalized.pt2 = snapPoint;
+
+    curr.pt1 = curr.pt2;
+
+    curr.pt2.x = snapPoint.x;
+    curr.pt2.y = snapPoint.y;
+
+    if (inpFree.has(snapPoint)) {
+        inpFree.delete(snapPoint);
+        inpConnected.add(snapPoint);
+    }
+    else {
+        renderer.remove(snapPoint.lineTo);
+    }
+
+    finalized.pt1.lineTo = finalized;
+    finalized.pt2.lineTo = finalized;
+    finalized.color = "#fff";
+    finalized.thickness = 3;
+    renderer.draw(finalized);
+});
+
+window.addEventListener("mousemove", e => {
+    let snapPoint = getSnap(e);
+    if (snapPoint == null) snapPoint = new Point(e.clientX * ratio, e.clientY * ratio, 10);
+
+    curr.pt2.x = snapPoint.x;
+    curr.pt2.y = snapPoint.y;
+
+    renderer.render();
+})
 
 let nodes = [];
 

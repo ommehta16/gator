@@ -91,10 +91,6 @@ button:hover {
     cursor: pointer;
 }
 
-button[selected] {
-    background: red;
-}
-
 #info {
     position: absolute;
     right: 1rem;
@@ -183,6 +179,18 @@ dialog>div>div>button {
     height: 2rem;
     backdrop-filter: none;
     background: #041a38;
+}
+
+dialog {
+    opacity: 0;
+
+    &[open] {
+        opacity: 1;
+
+        @starting-style {
+            opacity: 0;
+        }
+    }
 }
 
 h2 {
