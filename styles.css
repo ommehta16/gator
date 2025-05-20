@@ -54,6 +54,12 @@ body {
     top: 2rem;
     margin-inline: auto;
     width: fit-content;
+    gap: 0.5rem;
+    display: flex;
+    flex-direction: row;
+}
+
+#edit-actions>div {
     border-radius: 1rem;
     background: #ffffff0f;
     backdrop-filter: blur(0.25rem);
@@ -62,9 +68,6 @@ body {
     background-position: center;
     border: 0.5px white solid;
     padding: 0.33rem;
-    gap: 1rem;
-    display: flex;
-    flex-direction: row;
 }
 
 button {
@@ -89,6 +92,13 @@ button {
 button:hover {
     background: #ffffff4a;
     cursor: pointer;
+}
+
+button[selected] {
+    --bro: rgb(127, 189, 255);
+    border-color: var(--bro);
+    color: var(--bro);
+    border-width: 2px;
 }
 
 #info {
@@ -198,7 +208,7 @@ h2 {
 }
 
 a {
-    color: rgb(127, 159, 255);
+    color: rgb(127, 189, 255);
 }
 
 a:hover {

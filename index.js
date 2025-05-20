@@ -4,7 +4,7 @@ document.querySelector("#canvas-container").appendChild(canvas);
 
 const snapDist = 40;
 let clicked = false;
-
+let mode = "edit";
 let mouseX = 0, mouseY = 0;
 document.addEventListener("mousemove", e => {
     mouseX = e.clientX;
@@ -52,19 +52,22 @@ class Point extends Drawable {
     radius;
     color;
     node = null;
+    /** @type {Line | null} */
+    line = null;
 
     /**
      * @param {number} x 
      * @param {number} y 
      * @param {number} radius 
      */
-    constructor(x, y, radius = 0, color = "#fff") {
+    constructor(x, y, radius = 0, color = "#fff", line = null) {
         super();
 
         this.x = x;
         this.y = y;
         this.radius = radius;
         this.color = color;
+        this.line = line;
     }
 
     render() {
@@ -96,6 +99,8 @@ class Line extends Drawable {
 
         this.pt1 = pt1;
         this.pt2 = pt2;
+        pt1.line = this;
+        pt2.line = this;
         this.color = color;
     }
 
@@ -162,19 +167,49 @@ class LogicNode extends Drawable {
         this.element.innerText = name;
         this.element.addEventListener("mousemove", e => {
             if (!clicked) return;
+            if (mode == "erase") {
+                this.delete();
+                erase();
+                return;
+            }
             this.element.style.setProperty("--xctr", clamp(e.clientX, 0, window.innerWidth) + "px");
             this.element.style.setProperty("--yctr", clamp(e.clientY, 0, window.innerHeight) + "px");
 
             for (let i = 1; i <= 5; i++) {
                 setTimeout(() => {
+                    if (!clicked) return;
                     this.element.style.setProperty("--xctr", clamp(mouseX, 0, window.innerWidth) + "px");
                     this.element.style.setProperty("--yctr", clamp(mouseY, 0, window.innerHeight) + "px");
                     renderer.render();
-                }, 25 * i)
+                }, 35 * i)
             }
             renderer.render();
         });
+        this.element.addEventListener("click", e => {
+            if (mode == "edit") return;
+            this.delete();
+            erase();
+        })
         renderer.draw(this);
+    }
+
+    delete() {
+        renderer.remove(this);
+        this.inputs.forEach(pt => {
+            // inpConnected.delete(pt);
+            // inpFree.delete(pt);
+            pt.node = null;
+            renderer.remove(pt.line);
+            pt.line = null;
+        });
+        this.outputs.forEach(pt => {
+            // outConnected.delete(pt);
+            // outFree.delete(pt);
+            pt.node = null;
+            renderer.remove(pt.line);
+            pt.line = null;
+        });
+        this.element.remove();
     }
 
     updatePoints() {
@@ -260,8 +295,9 @@ const getSnap = (e) => {
 
     return closePt;
 }
-
 canvas.addEventListener("click", e => {
+    if (mode != "edit") return;
+
     let snapPoint = getSnap(e);
 
     if (snapPoint == null) return; //snapPoint = new Point(e.clientX * ratio, e.clientY * ratio, 10);
@@ -289,18 +325,20 @@ canvas.addEventListener("click", e => {
         inpConnected.add(snapPoint);
     }
     else {
-        renderer.remove(snapPoint.lineTo);
+        renderer.remove(snapPoint.line);
     }
 
-    finalized.pt1.lineTo = finalized;
-    finalized.pt2.lineTo = finalized;
+    finalized.pt1.line = finalized;
+    finalized.pt2.line = finalized;
     finalized.color = "#fff";
     finalized.thickness = 3;
     renderer.draw(finalized);
 });
 
 window.addEventListener("mousemove", e => {
-    let snapPoint = getSnap(e);
+    /** @type {Point|null}} */
+    let snapPoint = null;
+    if (mode == "edit") snapPoint = getSnap(e);
     if (snapPoint == null) snapPoint = new Point(e.clientX * ratio, e.clientY * ratio, 10);
 
     curr.pt2.x = snapPoint.x;
@@ -320,6 +358,22 @@ function addNode(type) {
     if (type == "not") nodes.push(new LogicNode(1, 1, "NOT", a => !a[0]));
 }
 
+function erase() {
+    curr.pt1 = curr.pt2;
+}
+
 document.querySelector("#add-and").addEventListener("click", addNode.bind(this, "and"));
 document.querySelector("#add-or").addEventListener("click", addNode.bind(this, "or"));
 document.querySelector("#add-not").addEventListener("click", addNode.bind(this, "not"));
+
+document.querySelector("#erase-mode").addEventListener("click", () => {
+    document.querySelector("#edit-mode").removeAttribute("selected");
+    document.querySelector("#erase-mode").setAttribute("selected", "");
+    mode = "erase";
+});
+
+document.querySelector("#edit-mode").addEventListener("click", () => {
+    document.querySelector("#erase-mode").removeAttribute("selected");
+    document.querySelector("#edit-mode").setAttribute("selected", "");
+    mode = "edit";
+});
