@@ -111,48 +111,6 @@ button[selected] {
     width: 2rem;
 }
 
-#draggables>div {
-    --xctr: 50vw;
-    --yctr: 50vh;
-    --width: 6rem;
-    --height: 3rem;
-    position: absolute;
-    top: calc(var(--yctr) - var(--height)/2);
-    left: calc(var(--xctr) - var(--width)/2);
-    width: var(--width);
-    height: var(--height);
-    border-radius: 1rem;
-    transition: none;
-    border: white solid 1px;
-    background-image: url("noise1.png");
-    background-size: 300%;
-    background-position: center;
-    backdrop-filter: blur(0.25rem);
-    user-select: none;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-#draggables>div:hover {
-    cursor: grab;
-}
-
-#draggables>div:active {
-    cursor: grabbing
-}
-
-dialog[open] {
-    min-width: 50%;
-    min-height: 50%;
-    border-radius: 1rem;
-    background: #0e2b52;
-    color: #fff;
-    border: 1px solid #aaa;
-    padding: 0;
-}
-
 dialog[open]::backdrop {
     backdrop-filter: blur(10px);
     background-color: rgba(35, 35, 35, 0.732);
@@ -162,9 +120,21 @@ dialog[open]::backdrop {
     opacity: 0.4;
 }
 
+dialog {
+    min-width: calc(min(max(60%, 50ch), 90vw));
+    min-height: 50%;
+    max-height: 90%;
+    border-radius: 1rem;
+    background: #0e2b52;
+    color: #fff;
+    border: 1px solid #aaa;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
 dialog>footer {
-    position: absolute;
-    bottom: 0;
     width: 100%;
     box-sizing: border-box;
     display: flex;
@@ -180,11 +150,17 @@ dialog>div {
     padding: 1.5rem;
 }
 
-dialog>div>div {
-    justify-content: space-between;
+#content {
+    max-height: 90vh;
+    overflow-y: scroll;
 }
 
-dialog>div>div>button {
+#top {
+    justify-content: space-between;
+    padding-bottom: 0;
+}
+
+#top>button {
     width: 2rem;
     height: 2rem;
     backdrop-filter: none;
@@ -225,4 +201,61 @@ button {
     :root {
         font-size: 1.25rem;
     }
+}
+
+#draggables>div {
+    --xctr: 50vw;
+    --yctr: 50vh;
+    --width: 6rem;
+    --height: 3rem;
+    position: absolute;
+    top: calc(var(--yctr) - var(--height)/2);
+    left: calc(var(--xctr) - var(--width)/2);
+    width: var(--width);
+    height: var(--height);
+    border-radius: 1rem;
+    transition: none;
+    border: white solid 1px;
+    background-image: url("noise1.png");
+    background-size: 300%;
+    background-position: center;
+    backdrop-filter: blur(0.25rem);
+    user-select: none;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#draggables>div:hover {
+    cursor: grab;
+}
+
+#draggables>div:active {
+    cursor: grabbing
+}
+
+#draggables>#start {
+    --height: 100vh;
+    --width: 2rem;
+    border-radius: 0;
+    border: none;
+    border-right: white 1px solid;
+    --xctr: calc(var(--width)/2);
+    background: none;
+}
+
+#draggables>#end {
+    --height: 100vh;
+    --width: 2rem;
+    border-radius: 0;
+    border: none;
+    border-left: white 1px solid;
+    --xctr: calc(100vw - var(--width)/2);
+    background: none;
+}
+
+#draggables>#start:hover,
+#draggables>#end:hover {
+    cursor: default;
 }

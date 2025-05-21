@@ -245,10 +245,10 @@ function resizeCanvas() {
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
-let start = new Point(100, 100, 3);
-let end = start;
+let p1 = new Point(100, 100, 3);
+let p2 = p1;
 
-const curr = new Line(start, end, "red");
+const curr = new Line(p1, p2, "red");
 renderer.draw(curr);
 
 /** @type {Set<Point>} */
@@ -377,3 +377,17 @@ document.querySelector("#edit-mode").addEventListener("click", () => {
     document.querySelector("#edit-mode").setAttribute("selected", "");
     mode = "edit";
 });
+
+const start = new LogicNode(0, 10, "", () => { });
+let cpy = start.element.cloneNode();
+start.element.parentNode.replaceChild(cpy, start.element);
+start.element = cpy;
+start.element.id = "start";
+
+const end = new LogicNode(10, 0, "", () => { });
+let cpy1 = end.element.cloneNode();
+end.element.parentNode.replaceChild(cpy1, end.element);
+end.element = cpy1;
+end.element.id = "end";
+
+renderer.render();
