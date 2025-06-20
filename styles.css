@@ -1,261 +1,95 @@
-:root {
-    --bg-col: #264775;
-    color: white;
-    background: var(--bg-col);
-
-    background-attachment: fixed;
-    background-position: center;
-    background-size: cover;
-    background-image: radial-gradient(circle, var(--bg-col) 0%, #051e40 100%);
-    background-repeat: no-repeat;
-}
-
-canvas {
-    height: 100vh;
-    width: 100vw;
-}
-
-/* GENERIC LAYOUT STUFF */
-.flex {
-    display: flex;
-    gap: 0.33rem;
-}
-
-.flex.row {
-    flex-direction: row;
-}
-
-.flex.col {
-    flex-direction: column;
-}
-
-.flex.wrap {
-    flex-wrap: wrap;
-}
-
-/* MAIN */
-
 * {
-    transition: all 0.2s, opacity 1s;
+    transition: all 0.2s;
 }
 
 body {
     font-family: "Raleway", sans-serif;
     margin: 0;
-    height: 100vh;
-    width: 100vw;
     overflow: hidden;
+    background: #111;
+    color: #eee;
 }
 
-#edit-actions {
+canvas {
     position: absolute;
+    width: 100vw;
+    height: 100vh;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+#bg-grab {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    inset: 0;
+    z-index: 0;
+}
+
+#ui {
+    position: absolute;
+    top: 2rem;
     left: 0;
     right: 0;
-    top: 2rem;
-    margin-inline: auto;
-    width: fit-content;
-    gap: 0.5rem;
     display: flex;
-    flex-direction: row;
+    gap: .5rem;
+    justify-content: center;
+    pointer-events: none;
 }
 
-#edit-actions>div {
-    border-radius: 1rem;
-    background: #ffffff0f;
-    backdrop-filter: blur(0.25rem);
-    background-image: url("noise.png");
-    background-size: 300%;
-    background-position: center;
-    border: 0.5px white solid;
-    padding: 0.33rem;
+#ui div {
+    background: #eee1;
+    display: flex;
+    padding: .25rem;
+    pointer-events: fill;
+    gap: 0.25rem;
+    border-radius: .5rem;
 }
 
-button {
-    left: 1rem;
-    top: 1rem;
-    z-index: 1;
-    display: block;
-    color: inherit;
-    font-family: inherit;
-    padding: 0.5rem;
-    border-radius: 1rem;
+#ui button {
+    background: transparent;
+    border: #bbb 1px solid;
+    min-width: 2rem;
     height: 2rem;
-    box-shadow: none;
-    border: white solid 1px;
-    background: #ffffff1f;
-    backdrop-filter: blur(0.25rem);
-    background-image: url("noise.png");
-    background-size: 300%;
-    background-position: center;
+    color: #eee;
+    border-radius: .25rem;
 }
 
-button:hover {
-    background: #ffffff4a;
+#ui button:hover {
+    background: #eee4;
     cursor: pointer;
 }
 
-button[selected] {
-    --bro: rgb(127, 189, 255);
-    border-color: var(--bro);
-    color: var(--bro);
-    border-width: 2px;
+#ui button[selected] {
+    border: #acf 2px solid;
 }
 
-#info {
+.node {
+    --x-pos: 0;
+    --y-pos: 0;
+
     position: absolute;
-    right: 1rem;
-    bottom: 1rem;
-    top: unset;
-    left: unset;
-    display: block;
-    width: 2rem;
-}
+    z-index: 1;
+    top: var(--y-pos);
+    left: var(--x-pos);
+    justify-content: center;
+    align-content: center;
+    padding: 1rem;
 
-dialog[open]::backdrop {
-    backdrop-filter: blur(10px);
-    background-color: rgba(35, 35, 35, 0.732);
-    background-image: url("noise.png");
-    background-size: cover;
-    background-position: center;
-    opacity: 0.4;
-}
-
-dialog {
-    min-width: calc(min(max(60%, 50ch), 90vw));
-    min-height: 50%;
-    max-height: 90%;
-    border-radius: 1rem;
-    background: #0e2b52;
-    color: #fff;
-    border: 1px solid #aaa;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-dialog>footer {
-    width: 100%;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    padding: 1.5rem;
-    background: #082346;
-    border-top: 1px #aaa solid;
-}
-
-dialog>div {
-    padding: 1.5rem;
-}
-
-#content {
-    max-height: 90vh;
-    overflow-y: scroll;
-}
-
-#top {
-    justify-content: space-between;
-    padding-bottom: 0;
-}
-
-#top>button {
-    width: 2rem;
-    height: 2rem;
-    backdrop-filter: none;
-    background: #041a38;
-}
-
-dialog {
-    opacity: 0;
-
-    &[open] {
-        opacity: 1;
-
-        @starting-style {
-            opacity: 0;
-        }
-    }
-}
-
-h2 {
-    margin: 0;
-}
-
-a {
-    color: rgb(127, 189, 255);
-}
-
-a:hover {
-    color: rgb(148, 174, 254);
-    text-shadow: 0 0 0.5rem rgba(255, 255, 255, 0.486);
-}
-
-button {
-    border-radius: 0.75rem;
-    font-size: 0.8rem;
-}
-
-@media screen and (max-width:500px) {
-    :root {
-        font-size: 1.25rem;
-    }
-}
-
-#draggables>div {
-    --xctr: 50vw;
-    --yctr: 50vh;
-    --width: 6rem;
-    --height: 3rem;
-    position: absolute;
-    top: calc(var(--yctr) - var(--height)/2);
-    left: calc(var(--xctr) - var(--width)/2);
-    width: var(--width);
-    height: var(--height);
-    border-radius: 1rem;
-    transition: none;
-    border: white solid 1px;
-    background-image: url("noise1.png");
-    background-size: 300%;
-    background-position: center;
-    backdrop-filter: blur(0.25rem);
     user-select: none;
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+    border: 1px solid white;
+    transition: all 0.2s, top 0s, left 0s;
 
-#draggables>div:hover {
-    cursor: grab;
-}
+    background: #222;
+    border-radius: 0.5rem;
 
-#draggables>div:active {
-    cursor: grabbing
-}
+    &:hover {
+        cursor: grab;
+    }
 
-#draggables>#start {
-    --height: 100vh;
-    --width: 2rem;
-    border-radius: 0;
-    border: none;
-    border-right: white 1px solid;
-    --xctr: calc(var(--width)/2);
-    background: none;
-}
-
-#draggables>#end {
-    --height: 100vh;
-    --width: 2rem;
-    border-radius: 0;
-    border: none;
-    border-left: white 1px solid;
-    --xctr: calc(100vw - var(--width)/2);
-    background: none;
-}
-
-#draggables>#start:hover,
-#draggables>#end:hover {
-    cursor: default;
+    &:active {
+        cursor: grabbing;
+    }
 }

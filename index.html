@@ -6,48 +6,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
     <title>Gator</title>
     <link rel="icon" href="icon.png">
-    <!-- <link rel="icon" href="static/icon.svg"> -->
     <link rel="stylesheet" href="styles.css">
     <script src="index.js" defer></script>
     <script src="https://kit.fontawesome.com/73bd27aadc.js" crossorigin="anonymous"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet">
-
-
 </head>
 
 <body>
-    <div id="canvas-container"></div>
-    <div id="draggables">
-
-    </div>
-    <div id="edit-actions">
-        <div class="flex row">
-            <button id="add-and">AND</button>
-            <button id="add-or">OR</button>
-            <button id="add-not">NOT</button>
+    <canvas id="gator"></canvas>
+    <div id="nodes"></div>
+    <div id="bg-grab"> </div>
+    <nav id="ui">
+        <div id="add">
+            <button id="and">AND</button>
+            <button id="or">OR</button>
+            <button id="not">NOT</button>
         </div>
-        <div class="flex row">
-            <button class="fa-solid fa-pencil" id="edit-mode" selected></button>
-            <button class="fa-solid fa-eraser" id="erase-mode"></button>
+        <div id="mode">
+            <button class="fa-solid fa-pencil" id="edit"></button>
+            <button class="fa-solid fa-eraser" id="erase"></button>
         </div>
-    </div>
-    <dialog id="dia">
-        <div class="flex row" id="top">
-            <h2>Alligater</h2>
-            <button class="fa-solid" onclick="dia.close()">X</button>
-        </div>
-        <div id="content">
-            <p>Make your own gates!</p>
-        </div>
-        <footer>
-            <div>(c) Om Mehta 2025</div>
-            <div>Made by <a href="https://ommehta16.github.io"><b>Om Mehta</b></a></div>
-        </footer>
-    </dialog>
-    <button id="info" onclick="dia.showModal()"><i class="fa-solid fa-info"></i></button>
+    </nav>
 </body>
 
 </html>
