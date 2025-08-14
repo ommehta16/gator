@@ -44,20 +44,24 @@ let selectedAt = { x: 0, y: 0 };
 */
 
 /** @type {Map<string, GateType>} */
-const gateTypes = new Map({
-    "and": {
+const gateTypes = new Map([
+    ["default", {
+        name: "",
+        func: (inps) => false
+    }],
+    ["and", {
         name: "AND",
         func: (inps) => inps[0] && inps[1]
-    },
-    "or": {
+    }],
+    ["or", {
         name: "OR",
         func: (inps) => inps[0] || inps[1]
-    },
-    "not": {
+    }],
+    ["not", {
         name: "NOT",
-        func: (inps) => ~inps[0]
-    }
-});
+        func: (inps) => !inps[0]
+    }]
+]);
 
 
 class Gate {
@@ -86,17 +90,29 @@ class Gate {
         this.element.className = "node";
 
         this.nodeType = nodeType;
-        this.element.innerText = this.nodeType;
+        /** @type {GateType} */
+        this.gate = gateTypes.get(nodeType) || gateTypes.get("default");
+        this.element.innerHTML = `${this.gate.name}`;
 
         document.querySelector("#nodes").append(this.element);
 
         this.moveTo(canvas.width / 2, canvas.height / 2);
 
         this.element.addEventListener("mousedown", e => {
+            if (mode == "erase") {
+                Gate.all.splice(Gate.all.indexOf(this));
+                this.element.remove();
+            }
+            if (this.element.querySelector(".out:hover")) return;
+
             selected = this;
             selectedAt.x = this.x - e.clientX * ratio;
             selectedAt.y = this.y - e.clientY * ratio;
         });
+
+        // this.element.querySelector(".out").addEventListener("mousedown", e => {
+
+        // });
     }
 
     /**
@@ -114,7 +130,7 @@ class Gate {
 
     /**
      * Gate factory
-     * @param {Gate} type the type of node ("and", "or" or "not") to add
+     * @param {string} type the type of node ("and", "or" or "not") to add
      * @returns {Gate}
      */
     static node(type) {
@@ -135,3 +151,9 @@ window.addEventListener("mousemove", e => {
 })
 
 window.addEventListener("mouseup", () => selected = null);
+
+const start = Gate.node("");
+start.element.id = "start";
+
+const end = Gate.node("");
+end.element.id = "end";

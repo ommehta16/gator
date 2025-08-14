@@ -84,6 +84,7 @@ canvas {
 
     background: #222;
     border-radius: 0.5rem;
+    overflow: hidden;
 
     &:hover {
         cursor: grab;
@@ -92,4 +93,49 @@ canvas {
     &:active {
         cursor: grabbing;
     }
+}
+
+/* 
+.node .out {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 25%;
+    background: transparent;
+
+    &:hover {
+        background: #fff4;
+        cursor: pointer;
+    }
+} */
+/* 
+body:has(#mode #erase[selected]) .node .out {
+    display: none;
+} */
+
+body:has(#mode #erase[selected]) .node:hover {
+    cursor: pointer;
+}
+
+#start.node {
+    left: 0;
+    border-left: none;
+}
+
+#end.node {
+    right: 0;
+    left: unset;
+    border-right: none;
+}
+
+#start.node,
+#end.node {
+    cursor: auto;
+    width: 4rem;
+    border-radius: 0;
+    border-bottom: none;
+    border-top: none;
+    top: 0;
+    bottom: 0;
 }
